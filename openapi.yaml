@@ -1,6 +1,6 @@
 openapi: 3.1.0
 info:
-  title: Hello World API
+  title: Inventory Management API
   version: 1.0.0
 servers:
   - url: https://a503-24-54-9-79.ngrok-free.app
@@ -19,4 +19,172 @@ paths:
                 properties:
                   message:
                     type: string
-                    example: Hello, World!
+                    example: Hello, Evans!
+  /inventory:
+    get:
+      summary: Get all inventory items
+      operationId: getInventory
+      responses:
+        '200':
+          description: List of inventory items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/InventoryItem'
+    post:
+      summary: Create a new inventory item
+      operationId: createInventoryItem
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+                category:
+                  type: string
+                image_url:
+                  type: string
+      responses:
+        '200':
+          description: Created inventory item
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryItem'
+  /inventory/{item_id}:
+    get:
+      summary: Get an inventory item by ID
+      operationId: getInventoryItem
+      parameters:
+        - name: item_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Inventory item
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryItem'
+    put:
+      summary: Update an inventory item
+      operationId: updateInventoryItem
+      parameters:
+        - name: item_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+                category:
+                  type: string
+                image_url:
+                  type: string
+      responses:
+        '200':
+          description: Updated inventory item
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InventoryItem'
+    delete:
+      summary: Delete an inventory item
+      operationId: deleteInventoryItem
+      parameters:
+        - name: item_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Deletion confirmation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+  /images/upload:
+    post:
+      summary: Upload an image
+      operationId: uploadImage
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Image upload response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  image_url:
+                    type: string
+  /images/{filename}:
+    get:
+      summary: Get an image by filename
+      operationId: getImage
+      parameters:
+        - name: filename
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The requested image
+          content:
+            image/*:
+              schema:
+                type: string
+                format: binary
+components:
+  schemas:
+    InventoryItem:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        category:
+          type: string
+        image_url:
+          type: string
+      required:
+        - id
+        - name
+        - description
+        - category
+        - image_url
