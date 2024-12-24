@@ -186,20 +186,39 @@ async def delete_inventory_item(item_id: str):
     save_inventory(inventory)
     return {"detail": f"Item with ID {item_id} has been deleted."}
 
-@app.get("/openapi.yaml", include_in_schema=False)
-async def get_openapi_spec():
-    return FileResponse("openapi.yaml")
+# Add servers dynamically
+def update_openapi_servers():
+    app.openapi_schema = None  # Clear cached schema
+    schema = app.openapi()
+    schema["servers"] = [{"url": BASE_URL}]
+    app.openapi_schema = schema
 
-@app.get("/plugin_manifest.json", include_in_schema=False)
+@app.get("/openapi.yaml")
+async def get_openapi_spec():
+    update_openapi_servers()
+    return JSONResponse(content=app.openapi())
+
+@app.get("/plugin_manifest.json")
 async def get_plugin_manifest():
-    return FileResponse("plugin_manifest.json")
+    manifest = {
+        "schema_version": "v1",
+        "name_for_human": "Inventory Manager",
+        "name_for_model": "inventory_manager",
+        "description_for_human": "Manage your inventory with images and descriptions.",
+        "description_for_model": "Plugin for managing inventory items with CRUD operations and image upload capabilities.",
+        "auth": {
+            "type": "none"
+        },
+        "api": {
+            "type": "openapi",
+            "url": f"{BASE_URL}/openapi.yaml",
+            "has_user_authentication": False
+        },
+        "logo_url": f"{BASE_URL}/static/logo.png",
+        "contact_email": "support@example.com",
+        "legal_info_url": "https://example.com/legal"
+    }
+    return JSONResponse(content=manifest)
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
-
-# Add servers dynamically
-@app.on_event("startup")
-async def update_openapi_servers():
-    if app.openapi_schema:
-        app.openapi_schema["servers"] = [
-            {"url": BASE_URL}
-        ]
+update_openapi_servers()  # Update servers on startup

@@ -12,5 +12,12 @@
         "description": "Official company logo image",
         "category": "Branding",
         "image_url": "/images/[UUID]_logo.png"
+    },
+    {
+        "id": "1b61a112-f5f2-4992-92c4-71a902388787",
+        "name": "Test Logo",
+        "description": "A test logo image",
+        "category": "Test",
+        "image_url": "/images/cfd9e2e6-8fe4-4063-8464-260b082a7409_logo.png"
     }
 ]
