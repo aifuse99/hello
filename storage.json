@@ -5,5 +5,12 @@
         "description": "Official company logo image",
         "category": "Branding",
         "image_url": "/images/aeed75c6-7341-4ce5-84cc-9e4fee47163d_logo.png"
+    },
+    {
+        "id": "43e4ae64-996d-49de-9709-8508606160d5",
+        "name": "Company Logo",
+        "description": "Official company logo image",
+        "category": "Branding",
+        "image_url": "/images/[UUID]_logo.png"
     }
 ]
