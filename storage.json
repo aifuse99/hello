@@ -19,5 +19,19 @@
         "description": "A test logo image",
         "category": "Test",
         "image_url": "/images/cfd9e2e6-8fe4-4063-8464-260b082a7409_logo.png"
+    },
+    {
+        "id": "a690acf9-802a-4588-9c70-7f9c1bf6511c",
+        "name": "Test Product",
+        "description": "A test product",
+        "category": "Test",
+        "image_url": "/images/cd3114f6-2ed1-4ec1-8c81-09063a84bab8_logo.png"
+    },
+    {
+        "id": "648e710a-85c5-40ac-8709-e2587e086bba",
+        "name": "Test Product",
+        "description": "A test product",
+        "category": "Test",
+        "image_url": "/images/3d329193-0336-4d0e-9f89-a85b78822283_logo.png"
     }
 ]

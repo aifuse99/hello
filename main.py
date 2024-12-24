@@ -1,15 +1,26 @@
 from fastapi import FastAPI, File, UploadFile, HTTPException, Form
 from fastapi.responses import JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List
 import os
 import uuid
 import json
 import logging
+import imghdr
 
 # Initialize FastAPI app
 app = FastAPI()
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allows all origins
+    allow_credentials=True,
+    allow_methods=["*"],  # Allows all methods
+    allow_headers=["*"],  # Allows all headers
+)
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -17,6 +28,8 @@ logger = logging.getLogger(__name__)
 
 # Configuration
 BASE_URL = os.getenv("BASE_URL", "http://localhost:8000")  # Default to localhost for development
+MAX_IMAGE_SIZE = 10 * 1024 * 1024  # 10MB limit
+ALLOWED_IMAGE_TYPES = {"jpeg", "png", "gif"}
 
 # Directory to store uploaded images
 UPLOAD_DIR = "./uploaded_images"
@@ -57,8 +70,21 @@ async def upload_image(file: UploadFile = File(...)):
     Upload an image and store it in the UPLOAD_DIR.
     Returns both the relative path and full URL of the uploaded image.
     """
-    if not file.content_type.startswith("image/"):
-        raise HTTPException(status_code=400, detail="Only image files are allowed.")
+    # Check file size
+    content = await file.read()
+    if len(content) > MAX_IMAGE_SIZE:
+        raise HTTPException(
+            status_code=400,
+            detail=f"File size exceeds maximum limit of {MAX_IMAGE_SIZE/1024/1024}MB"
+        )
+    
+    # Verify it's an image
+    image_type = imghdr.what(None, content)
+    if not image_type or image_type not in ALLOWED_IMAGE_TYPES:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid image format. Allowed formats: {', '.join(ALLOWED_IMAGE_TYPES)}"
+        )
 
     # Generate a unique filename
     file_id = str(uuid.uuid4())
@@ -66,7 +92,6 @@ async def upload_image(file: UploadFile = File(...)):
 
     # Save the file locally
     with open(file_path, "wb") as f:
-        content = await file.read()
         f.write(content)
 
     # Create both relative path and full URL
@@ -219,6 +244,9 @@ async def get_plugin_manifest():
         "legal_info_url": "https://example.com/legal"
     }
     return JSONResponse(content=manifest)
+
+# Mount the uploaded images directory
+app.mount("/images", StaticFiles(directory=UPLOAD_DIR), name="images")
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 update_openapi_servers()  # Update servers on startup
