@@ -5,21 +5,6 @@ info:
 servers:
   - url: https://a503-24-54-9-79.ngrok-free.app
 paths:
-  /hello:
-    get:
-      operationId: getHello
-      summary: Returns a greeting message
-      responses:
-        '200':
-          description: A JSON object containing a greeting message
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: Hello, Evans!
   /inventory:
     get:
       summary: Get all inventory items

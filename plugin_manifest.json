@@ -9,7 +9,8 @@
   },
   "api": {
     "type": "openapi",
-    "url": "https://a503-24-54-9-79.ngrok-free.app/openapi.yaml"
+    "url": "{url}/openapi.yaml",
+    "has_user_authentication": false
   },
   "logo_url": "https://a503-24-54-9-79.ngrok-free.app/static/logo.png",
   "contact_email": "support@example.com",

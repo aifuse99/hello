@@ -51,10 +51,6 @@ def save_inventory(data):
     with open(STORAGE_FILE, "w") as f:
         json.dump(data, f, indent=4)
 
-@app.get("/hello", name="getHello")
-async def read_root():
-    return {"message": "Hello, Evans!"}
-
 @app.post("/images/upload")
 async def upload_image(file: UploadFile = File(...)):
     """

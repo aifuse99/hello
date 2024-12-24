@@ -63,16 +63,7 @@ uvicorn main:app --port 8080 --reload
 
 ## Testing the API
 
-### 1. Test Hello World Endpoint
-```bash
-curl https://xxxx-xx-xx-xxx-xx.ngrok-free.app/hello
-```
-Expected response:
-```json
-{"message":"Hello, Evans!"}
-```
-
-### 2. Upload an Image
+### 1. Upload an Image
 ```bash
 curl -X POST https://xxxx-xx-xx-xxx-xx.ngrok-free.app/images/upload -F "file=@static/logo.png"
 ```
@@ -84,7 +75,7 @@ Expected response:
 }
 ```
 
-### 3. Create an Inventory Item
+### 2. Create an Inventory Item
 ```bash
 curl -X POST https://xxxx-xx-xx-xxx-xx.ngrok-free.app/inventory \
   -F "name=Company Logo" \
@@ -103,7 +94,7 @@ Expected response:
 }
 ```
 
-### 4. List All Inventory Items
+### 3. List All Inventory Items
 ```bash
 curl https://xxxx-xx-xx-xxx-xx.ngrok-free.app/inventory
 ```
