@@ -15,6 +15,9 @@ app = FastAPI()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# Configuration
+BASE_URL = os.getenv("BASE_URL", "http://localhost:8000")  # Default to localhost for development
+
 # Directory to store uploaded images
 UPLOAD_DIR = "./uploaded_images"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
@@ -56,7 +59,7 @@ async def read_root():
 async def upload_image(file: UploadFile = File(...)):
     """
     Upload an image and store it in the UPLOAD_DIR.
-    Returns the URL of the uploaded image.
+    Returns both the relative path and full URL of the uploaded image.
     """
     if not file.content_type.startswith("image/"):
         raise HTTPException(status_code=400, detail="Only image files are allowed.")
@@ -70,19 +73,32 @@ async def upload_image(file: UploadFile = File(...)):
         content = await file.read()
         f.write(content)
 
-    # Use the current server URL for the image URL
-    file_url = f"/images/{file_id}_{file.filename}"
-    return JSONResponse(content={"image_url": file_url})
+    # Create both relative path and full URL
+    relative_path = f"/images/{file_id}_{file.filename}"
+    file_url = f"{BASE_URL}{relative_path}"
+    
+    return JSONResponse(content={
+        "image_url": relative_path,  # Store relative path
+        "full_url": file_url        # Also provide full URL for convenience
+    })
 
 @app.get("/images/{filename}")
 async def get_image(filename: str):
     """
-    Serve uploaded images.
+    Serve uploaded images with proper content type.
     """
     file_path = os.path.join(UPLOAD_DIR, filename)
     if not os.path.exists(file_path):
         raise HTTPException(status_code=404, detail="Image not found.")
-    return FileResponse(file_path)
+    
+    # Determine content type based on file extension
+    content_type = "image/jpeg"  # default
+    if filename.lower().endswith(".png"):
+        content_type = "image/png"
+    elif filename.lower().endswith(".gif"):
+        content_type = "image/gif"
+    
+    return FileResponse(file_path, media_type=content_type)
 
 @app.get("/inventory", response_model=List[InventoryItem])
 async def get_inventory():
@@ -107,13 +123,19 @@ async def create_inventory_item(
     name: str = Form(...),
     description: str = Form(...),
     category: str = Form(...),
-    image_url: str = Form(...),
+    image_url: str = Form(...)
 ):
     """
     Create a new inventory item.
+    Expects image_url to be a relative path returned from the upload endpoint.
     """
     inventory = load_inventory()
     item_id = str(uuid.uuid4())
+    
+    # Ensure image_url starts with /images/
+    if not image_url.startswith("/images/"):
+        raise HTTPException(status_code=400, detail="Invalid image URL format. Must start with /images/")
+
     item = {
         "id": item_id,
         "name": name,
@@ -131,7 +153,7 @@ async def update_inventory_item(
     name: str = Form(...),
     description: str = Form(...),
     category: str = Form(...),
-    image_url: str = Form(...),
+    image_url: str = Form(...)
 ):
     """
     Update an existing inventory item.
@@ -140,6 +162,10 @@ async def update_inventory_item(
     item = next((item for item in inventory if item["id"] == item_id), None)
     if not item:
         raise HTTPException(status_code=404, detail="Inventory item not found.")
+    
+    # Ensure image_url starts with /images/
+    if not image_url.startswith("/images/"):
+        raise HTTPException(status_code=400, detail="Invalid image URL format. Must start with /images/")
     
     item.update({
         "name": name,
@@ -179,5 +205,5 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 async def update_openapi_servers():
     if app.openapi_schema:
         app.openapi_schema["servers"] = [
-            {"url": "https://a503-24-54-9-79.ngrok-free.app"}
+            {"url": BASE_URL}
         ]
